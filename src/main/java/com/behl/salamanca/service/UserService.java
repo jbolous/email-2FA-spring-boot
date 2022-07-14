@@ -81,23 +81,35 @@ public class UserService {
         }
 
         if (storedOneTimePassword != null) {
+            if(storedOneTimePassword.equals(Integer.valueOf(0))){
+                oneTimePasswordCache.cleanUp();
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "One time password is invalid or expired");
+            }
             if (storedOneTimePassword.equals(otpVerificationRequestDto.getOneTimePassword())) {
                 if (otpVerificationRequestDto.getContext().equals(OtpContext.SIGN_UP)) {
                     user.setEmailVerified(true);
                     user = userRepository.save(user);
+
+                    // Invalidate OTP so the user can't log in with it again.
+                    oneTimePasswordCache.invalidate(user.getEmailId());
                     return ResponseEntity
                             .ok(UserLoginSuccessDto.builder().accessToken(jwtUtils.generateAccessToken(user))
                                     .refreshToken(jwtUtils.generateRefreshToken(user)).build());
                 }
-                if (otpVerificationRequestDto.getContext().equals(OtpContext.ACCOUNT_DELETION)) {
+                else if (otpVerificationRequestDto.getContext().equals(OtpContext.ACCOUNT_DELETION)) {
                     user.setActive(false);
                     user = userRepository.save(user);
                     return ResponseEntity.ok().build();
                 }
+                else if(otpVerificationRequestDto.getContext().equals(OtpContext.LOGIN)){
+                    return ResponseEntity.ok(UserLoginSuccessDto.builder().accessToken(jwtUtils.generateAccessToken(user))
+                            .refreshToken(jwtUtils.generateRefreshToken(user)).build());
+                }
             }
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
-        } else
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+            else
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
     }
 
     public ResponseEntity<?> deleteAccount(final UUID userId) {
@@ -146,6 +158,11 @@ public class UserService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
         return ResponseEntity.ok(UserLoginSuccessDto.builder().refreshToken(tokenRefreshRequestDto.getRefreshToken())
                 .accessToken(jwtUtils.generateAccessToken(user)).build());
+    }
+
+    //This method is used to clear the OTP catched already
+    public void clearOTP(String key){
+        oneTimePasswordCache.invalidate(key);
     }
 
 }

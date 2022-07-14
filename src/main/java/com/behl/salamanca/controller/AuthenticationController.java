@@ -3,11 +3,7 @@ package com.behl.salamanca.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.behl.salamanca.dto.OtpVerificationRequestDto;
 import com.behl.salamanca.dto.TokenRefreshRequestDto;
@@ -20,6 +16,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.AllArgsConstructor;
 
 @RestController
+@RequestMapping(value = "/api")
 @AllArgsConstructor
 public class AuthenticationController {
 

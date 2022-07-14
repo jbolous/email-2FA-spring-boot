@@ -30,6 +30,9 @@ public class User implements Serializable {
     @Column(name = "email_id", nullable = false, unique = true)
     private String emailId;
 
+    @Column(name="role", nullable = false)
+    private String role;
+
     @Column(name = "password", nullable = false)
     private String password;
 
@@ -38,6 +41,9 @@ public class User implements Serializable {
 
     @Column(name = "is_active", nullable = false)
     private boolean isActive;
+
+    @Column(name="full_name")
+    private String fullName;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
